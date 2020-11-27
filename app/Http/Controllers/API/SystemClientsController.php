@@ -1624,7 +1624,7 @@ if(!isset($resultArray['rcsid']))
             echo "<pre>";
             print_r($bos1Total);
             echo "</pre>";
-            exit();
+            exit(); 
 
 
 
