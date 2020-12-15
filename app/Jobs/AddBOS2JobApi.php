@@ -41,14 +41,14 @@ class AddBOS2JobApi implements ShouldQueue
    public function handle()
     {
         try{
-            $arrayData = array();
-           $arrayData = $this->request;
-             $var1 = BOS2::create($arrayData); 
-                    $previousData = BOS2::where('client_id',$var1->client_id)->first();
-                    $prev_data = json_encode($previousData); 
-                     $logs = array('system_id'=>$previousData->bos2_id,'system_name'=>'BOS2','client_id'=>$previousData->client_id,'action_performed'=>'Add','previous_data'=>$previousData);
-                    $cleintLogs = ClientLogs::insert($logs);
-                    $find_match = \App\Helpers\Helper::matchData1('BOS2',$arrayData); 
+            $request_data = array();
+           $request_data = $this->request;
+             $var1 = BOS2::create($request_data); 
+                    $previous_data = BOS2::where('client_id',$var1->client_id)->first();
+                    $previous_data_json_encoded = json_encode($previous_data); 
+                     $logs = array('system_id'=>$previous_data->bos2_id,'system_name'=>'BOS2','client_id'=>$previous_data->client_id,'action_performed'=>'Add','previous_data'=>$previous_data);
+                    $client_logs = ClientLogs::insert($logs);
+                    $match_data = \App\Helpers\Helper::matchData('BOS2',$request_data); 
                     
         }catch(\Exception $ex){ 
             print_r($ex->getMessage()); 

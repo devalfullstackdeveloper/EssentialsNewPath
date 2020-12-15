@@ -12,6 +12,7 @@ use Exception;
 use DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Schema;
+use App\Models\ClientLogs;
 
 class UpdateBOS2Job implements ShouldQueue
 {
@@ -41,7 +42,7 @@ class UpdateBOS2Job implements ShouldQueue
     {
         try{
             $find = BOS2::where('client_id','=',$this->request['client_id'])->get();
-            
+             $this->request['system'] = 'BOS2'; 
             if(count($find)>0){
                 $cols = DB::getSchemaBuilder()->getColumnListing('bos2_data');
                 $this->versionData($this->request['client_id'],$this->request);
@@ -53,6 +54,20 @@ class UpdateBOS2Job implements ShouldQueue
                 }
                 
             }
+            else
+            {
+                $request_data = array();
+                $request_data = $this->request;
+                $var1 = BOS2::create($request_data); 
+                $previous_data = BOS2::where('client_id',$var1->client_id)->first();
+                $previous_data_json_encoded = json_encode($previous_data); 
+                $logs = array('system_id'=>$previous_data->bos2_id,'system_name'=>'BOS2','client_id'=>$previous_data->client_id,'action_performed'=>'Add','previous_data'=>$previous_data);
+                $client_logs = ClientLogs::insert($logs);
+                $match_data = \App\Helpers\Helper::matchData('BOS2',$request_data); 
+            }
+
+
+
             
         }catch(\Exception $ex){
             print_r($ex->getMessage());

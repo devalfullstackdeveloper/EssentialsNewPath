@@ -12,6 +12,7 @@ use Exception;
 use DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Schema;
+use App\Models\ClientLogs;
 
 class UpdateMIMJob implements ShouldQueue
 {
@@ -41,7 +42,7 @@ class UpdateMIMJob implements ShouldQueue
     {
         try{
             $find = MIM::where('client_id','=',$this->request['client_id'])->get();
-            
+             $this->request['system'] = 'MIM'; 
             if(count($find)>0){
                 $cols = DB::getSchemaBuilder()->getColumnListing('mim_data');
                 $this->versionData($this->request['client_id'],$this->request);
@@ -52,6 +53,17 @@ class UpdateMIMJob implements ShouldQueue
                     }
                 }
                 
+            }
+            else
+            {
+               $request_data = array();
+               $request_data = $this->request;
+               $insert_data = MIM::create($request_data); 
+               $previous_data = MIM::where('client_id',$insert_data->client_id)->first();
+               $previous_data_json_encoded = json_encode($previous_data); 
+               $logs = array('system_id'=>$previous_data->MIM_id,'system_name'=>'MIM','client_id'=>$previous_data->client_id,'action_performed'=>'Add'   ,'previous_data'=>$previous_data);
+               $client_logs = ClientLogs::insert($logs);
+               $match_data = \App\Helpers\Helper::matchData('MIM',$request_data); 
             }
             
         }catch(\Exception $ex){

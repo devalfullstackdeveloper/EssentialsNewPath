@@ -41,15 +41,14 @@ class AddMIMJobApi implements ShouldQueue
    public function handle()
     {
         try{
-            $arrayData = array();
-           $arrayData = $this->request;
-             $var1 = MIM::create($arrayData); 
-                    $previousData = MIM::where('client_id',$var1->client_id)->first();
-                    $prev_data = json_encode($previousData); 
-                    $logs = array('system_id'=>$previousData->MIM_id,'system_name'=>'MIM','client_id'=>$previousData->client_id,'action_performed'=>'Add'   ,'previous_data'=>$previousData);
-
-                    $cleintLogs = ClientLogs::insert($logs); 
-                    $find_match = \App\Helpers\Helper::matchData1('MIM',$arrayData); 
+            $request_data = array();
+           $request_data = $this->request;
+             $insert_data = MIM::create($request_data); 
+                    $previous_data = MIM::where('client_id',$insert_data->client_id)->first();
+                    $previous_data_json_encoded = json_encode($previous_data); 
+                    $logs = array('system_id'=>$previous_data->MIM_id,'system_name'=>'MIM','client_id'=>$previous_data->client_id,'action_performed'=>'Add'   ,'previous_data'=>$previous_data);
+                    $client_logs = ClientLogs::insert($logs);
+                    $match_data = \App\Helpers\Helper::matchData('MIM',$request_data); 
         }catch(\Exception $ex){
             print_r($ex->getMessage());
         }

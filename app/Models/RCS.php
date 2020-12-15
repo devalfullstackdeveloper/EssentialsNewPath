@@ -16,7 +16,7 @@ class RCS extends Model
     protected $fillable = ['client_id','title','name_first','name_last','name_middle','address','delivery_address',
 							'dob','mobile','phone','email','crn','driver_license','passport','medicare_card',
 							'medicare_card_reference','green_id_passport','green_id_medicare','green_id_driving_license',
-							'bsb','account_number','contract_id']; 
+							'bsb','account_number','contract_id','system'];  
 
 	public static function store($data,$system){
 		$counter = 0;
@@ -26,11 +26,8 @@ class RCS extends Model
 
 
 		foreach ($data as $key => $value) {
-
-
 			$checkExist = DB::table("rcs_data")->select('client_id')->where(["client_id"=>$value['client_id'],"import_flag"=>"1"])->get();
 			if(count($checkExist)==0){
-
 				$add = new RCS();
 	           	$add->client_id                   = $value['client_id'];
 	            $add->title                       = $value['title'];
@@ -57,7 +54,7 @@ class RCS extends Model
 	            $add->import_flag = "1";
 	            $add->save();  
 	            if($add->id>0){
-	              $counter++;
+	              $counter++; 
 	            }
 
 	            
@@ -88,5 +85,107 @@ class RCS extends Model
        $importLog->save();	
 	   }	
        
-    }						
+    }
+
+    /*
+    public static function search($search) {
+
+    $columns = ["name_first", "name_last"]; 
+      $fname = implode("%", str_split($search['name_first']));
+      $fname = "%$fname%";
+      	$lname = implode("%", str_split($search['name_last']));
+      	$lname = "%$lname%";
+      	
+      	return static::where("name_first", "like", $fname)->orWhere("name_last", "like", $lname)->get();
+  }
+*/
+
+public static function searchplugin($search) {
+    $columns = ["name_first", "name_last"]; 
+      $fname = implode("%", str_split($search['name_first']));
+      $fname = "%$fname%";
+      	$lname = implode("%", str_split($search['name_last']));
+      	$lname = "%$lname%";
+      	DB::enableQueryLog(); 
+      	$rcs_row =  static::where(function($rcs_row) use ($search){
+                if(isset($fname) && $fname != '' )
+                {
+                    $rcs_row->where("name_first", "like", $fname);
+                }
+                if(isset($lname) && $lname != '' )
+                {
+                    $rcs_row->where("name_last", "like", $lname);
+                }
+                if(isset($search['dob']) && $search['dob'] != '')
+                {
+                    $rcs_row->where('dob', $search['dob']);
+                }
+                if(isset($search['crn']) && $search['crn'] != '')
+                {
+                    $rcs_row->orWhere('crn', $search['crn']);
+                }
+                if(isset($search['driver_license']) && $search['driver_license'] != '')
+                {
+                    $rcs_row->orWhere('driver_license', $search['driver_license']);
+                }
+                if(isset($search['passport']) && $search['driver_license'] != '')
+                {
+                    $rcs_row->orWhere('passport', $search['passport']);
+                } 
+                if(isset($search['medicare_card']) && $search['medicare_card'] != '')
+                {
+                    $rcs_row->orWhere('medicare_card', $search['medicare_card']);
+                }
+            })->get();
+      	
+	
+
+			return $rcs_row;
+      	     	// return static::where("name_first", "like", $fname)->orWhere("name_last", "like", $lname)->get();
+  }
+
+  public static function search($search) {
+    $columns = ["name_first", "name_last"]; 
+    $fname = implode("%", str_split($search['name_first']));
+    $fname = "%$fname%";
+    $lname = implode("%", str_split($search['name_last']));
+    $lname = "%$lname%";
+
+
+    $rcs_row = static::query();
+
+    if(isset($fname) && $fname != '' ) {
+      $rcs_row = $rcs_row->where("name_first", "like", $fname);
+    }
+    if(isset($lname) && $lname != '' ) {
+      $rcs_row = $rcs_row->where("name_last", "like", $lname);
+    }
+
+    if(isset($search['dob']) && $search['dob'] != '')
+    {
+      $rcs_row = $rcs_row->where('dob', $search['dob']);
+    }
+    if(isset($search['crn']) && $search['crn'] != '')
+    {
+      $rcs_row = $rcs_row->orWhere('crn', $search['crn']);
+    }
+    if(isset($search['driver_license']) && $search['driver_license'] != '')
+    {
+      $rcs_row = $rcs_row->orWhere('driver_license', $search['driver_license']);
+    }
+    if(isset($search['passport']) && $search['passport'] != '')
+    {
+      $rcs_row = $rcs_row->orWhere('passport', $search['passport']);
+    } 
+    if(isset($search['medicare_card']) && $search['medicare_card'] != '')
+    {                   
+      $rcs_row = $rcs_row->orWhere('medicare_card', $search['medicare_card']);
+    }
+    $rcs_row = $rcs_row->get();
+    return $rcs_row;
+  }
+
+
+
+  						
 }

@@ -26,13 +26,13 @@ class UpdateMIMJobApi implements ShouldQueue
 
     protected $system;
     protected $request;
-    protected $clientId;
+    protected $clientid;
     
-    public function __construct($system,$request,$clientId) 
+    public function __construct($system,$request,$clientid) 
     {
          $this->system = $system;
         $this->request = $request;
-        $this->clientId = $clientId;
+        $this->clientid = $clientid;
     }
 
     /**
@@ -43,31 +43,33 @@ class UpdateMIMJobApi implements ShouldQueue
    public function handle()
     {
         try{
-            $arrayData = array();
-           $arrayData = $this->request;
-           $ClientId = $this->clientId;
+            $request_data = array();
+           $request_data = $this->request;
+           $client_id = $this->clientid;
+           if($client_id == '')
+           {
+                $client_id = $request_data['client_id'];
+           }
 
-            $previousData = MIM::where('client_id',$ClientId)->first();
-             $find = MIM::where('client_id','=',$ClientId)->get();
+            $previous_data = MIM::where('client_id',$client_id)->first();
+             $check_client_data_present = MIM::where('client_id','=',$client_id)->get();
             
-            if(count($find)>0){
-                $cols = DB::getSchemaBuilder()->getColumnListing('mim_data');
+            if(count($check_client_data_present)>0){
+                $database_columns = DB::getSchemaBuilder()->getColumnListing('mim_data');
                 foreach ($this->request as $key => $value) {
-                    if(in_array($key,$cols)){
-                        $update = DB::table('mim_data')->where(["MIM_id"=>$find[0]->MIM_id]); 
+                    if(in_array($key,$database_columns)){
+                        $update = DB::table('mim_data')->where(["MIM_id"=>$check_client_data_present[0]->MIM_id]); 
                         $update = $update->update([$key => $value]);    
                     }
                 }
                 
             }
-               
-                       
-                        $prev_data = json_encode($previousData);
-                        $var1 = MIM::where('client_id',$ClientId)->update($this->request);
-                        $logs = array('system_id'=>$previousData->MIM_id,'system_name'=>'MIM','client_id'=>$previousData->client_id,'action_performed'=>'Update','previous_data'=>$prev_data);
+                    $previous_data_json_encoded = json_encode($previous_data);
+                        // $mim1_update = MIM::where('client_id',$client_id)->update($this->request);
+                        $logs = array('system_id'=>$previous_data->MIM_id,'system_name'=>'MIM','client_id'=>$previous_data->client_id,'action_performed'=>'Update','previous_data'=>$previous_data_json_encoded);
                         $cleintLogs = ClientLogs::insert($logs);
 
-                        $find_match = \App\Helpers\Helper::matchData1($this->system,$arrayData); 
+                        $check_client_data_present_match = \App\Helpers\Helper::matchData($this->system,$request_data); 
         }catch(\Exception $ex){
             print_r($ex->getMessage());
         }

@@ -41,18 +41,18 @@ class AddBOS1JobApi implements ShouldQueue
    public function handle()
     {
         try{
-            $arrayData = array();
-           $arrayData = $this->request;
-             $var1 = BOS1::create($arrayData); 
-                    $previousData = BOS1::where('client_id',$var1->client_id)->first();
-                    $prev_data = json_encode($previousData); 
-                     $logs = array('system_id'=>$previousData->bos1_id,'system_name'=>'BOS1','client_id'=>$previousData->client_id,'action_performed'=>'Add','previous_data'=>$previousData);
-                    
-                    $cleintLogs = ClientLogs::insert($logs);
-
-                     
-
-                    $find_match = \App\Helpers\Helper::matchData1('BOS1',$arrayData);  
+            $request_data = array();
+            //Array to assign request data 
+           $request_data = $this->request;
+           //Insert Eloquent
+             $insert_data = BOS1::create($request_data); 
+                    $previous_data = BOS1::where('client_id',$insert_data->client_id)->first();
+                    $previous_data_json_encoded = json_encode($previous_data); 
+                     $logs = array('system_id'=>$previous_data->bos1_id,'system_name'=>'BOS1','client_id'=>$previous_data->client_id,'action_performed'=>'Add','previous_data'=>$previous_data);
+                    //Insert Client Logs Eloquent
+                    $client_logs = ClientLogs::insert($logs);
+                    //Matching Algorithm
+                    $match_data = \App\Helpers\Helper::matchData('BOS1',$request_data);  
  
         }catch(\Exception $ex){ 
             print_r($ex->getMessage());  

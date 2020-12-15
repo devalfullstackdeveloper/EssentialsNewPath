@@ -12,6 +12,7 @@ use Exception;
 use DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Schema;
+use App\Models\ClientLogs;
 
 class UpdateBOS1JOB implements ShouldQueue
 {
@@ -41,7 +42,7 @@ class UpdateBOS1JOB implements ShouldQueue
 
         try{
             $find = BOS1::where('client_id','=',$this->request['client_id'])->get();
-            
+             $this->request['system'] = 'BOS1'; 
             if(count($find)>0){
                 $cols = DB::getSchemaBuilder()->getColumnListing('bos1_data');
                 $this->versionData($this->request['client_id'],$this->request);
@@ -51,8 +52,21 @@ class UpdateBOS1JOB implements ShouldQueue
                         $update = $update->update([$key => $value]);
                     }
                 }
-                
+ 
+               $match_data = \App\Helpers\Helper::matchData('BOS1',$this->request); 
+
             }
+            else
+            {
+                $insert_data = BOS1::create($this->request); 
+                    $previous_data = BOS1::where('client_id',$insert_data->client_id)->first();
+                    $previous_data_json_encoded = json_encode($previous_data); 
+                     $logs = array('system_id'=>$previous_data->bos1_id,'system_name'=>'BOS1','client_id'=>$previous_data->client_id,'action_performed'=>'Add','previous_data'=>$previous_data);
+                    //Insert Client Logs Eloquent
+                    $client_logs = ClientLogs::insert($logs);
+                    //Matching Algorithm
+                    $match_data = \App\Helpers\Helper::matchData('BOS1',$this->request);  
+                } 
             
         }catch(\Exception $ex){
             print_r($ex->getMessage());

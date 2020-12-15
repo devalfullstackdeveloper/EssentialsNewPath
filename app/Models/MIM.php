@@ -11,7 +11,7 @@ class MIM extends Model
 {	
 	use HasFactory;
 	protected $table = 'mim_data';  
-	protected $fillable = ['client_id','order_id','customer_id','first_name','middle_name','last_name','date_of_birth','flat_number','street_number','street_name','suburb','country','licence_number','licence_state','terms_conditions_accepted','entered','entered_user_id','verification_status','passport_number','passport_country','passport_expiry','status','last_updated','crn_number','home_phone_area_code','home_phone','mobile_phone','email','dob','address1','address2','postcode','state','benefit_id','account_no','email_optout','is_newsletter_unsubscribed','unique_id','is_test_account','fortnightly_income','fortnightly_expenses','home_phone_area_code_2nd','home_phone_2nd','mobile_phone_2nd','unit_no','street_no','street_type','account_type','frequency_type','account_holder_name','bsb','bank_account_no','ezidebit_account_no','ezidebit_creation','driver_license_no','medicare_no','passport_no','previous_unit_no','previous_street_no','previous_street_name','previous_street_type','previous_postcode','previous_suburb','previous_state','is_skip_tally_limit','skip_tally_limit_updated_by','skip_tally_limit_updated_at','residency_status','is_consent_privacy_act','is_essential_opt_out','is_essential_opt_out_sms','customer_password','authorised_person','authorised_relation','authorised_dob','marital_status','dependants','is_qualify','is_no_recent_payment','no_recent_payment_at','user_id'
+	protected $fillable = ['client_id','order_id','customer_id','first_name','middle_name','last_name','date_of_birth','flat_number','street_number','street_name','suburb','country','licence_number','licence_state','terms_conditions_accepted','entered','entered_user_id','verification_status','passport_number','passport_country','passport_expiry','status','last_updated','crn_number','home_phone_area_code','home_phone','mobile_phone','email','dob','address1','address2','postcode','state','benefit_id','account_no','email_optout','is_newsletter_unsubscribed','unique_id','is_test_account','fortnightly_income','fortnightly_expenses','home_phone_area_code_2nd','home_phone_2nd','mobile_phone_2nd','unit_no','street_no','street_type','account_type','frequency_type','account_holder_name','bsb','bank_account_no','ezidebit_account_no','ezidebit_creation','driver_license_no','medicare_no','passport_no','previous_unit_no','previous_street_no','previous_street_name','previous_street_type','previous_postcode','previous_suburb','previous_state','is_skip_tally_limit','skip_tally_limit_updated_by','skip_tally_limit_updated_at','residency_status','is_consent_privacy_act','is_essential_opt_out','is_essential_opt_out_sms','customer_password','authorised_person','authorised_relation','authorised_dob','marital_status','dependants','is_qualify','is_no_recent_payment','no_recent_payment_at','system','user_id'
 	];  
 
 
@@ -146,6 +146,103 @@ class MIM extends Model
        $importLog->log_at = $type;
        $importLog->save();
     }
+
+    /*
+    public static function search($search) {
+
+    $columns = ["name_first", "name_last"]; 
+      $fname = implode("%", str_split($search['name_first']));
+      $fname = "%$fname%";
+        $lname = implode("%", str_split($search['name_last']));
+        $lname = "%$lname%";
+        
+        return static::where("name_first", "like", $fname)->orWhere("name_last", "like", $lname)->get();
+  }
+*/
+
+// public static function searchplugin($search) {
+//     $columns = ["name_first", "name_last"]; 
+//       $fname = implode("%", str_split($search['first_name']));
+//       $fname = "%$fname%";
+//         $lname = implode("%", str_split($search['last_name']));
+//         $lname = "%$lname%"; 
+//         $bos1_row =  static::where(function($bos1_row) use ($search){
+//                 if(isset($fname) && $fname != '' )
+//                 {
+//                     $bos1_row->where("first_name", "like", $fname);
+//                 }
+//                 if(isset($lname) && $lname != '' )
+//                 {
+//                     $bos1_row->where("last_name", "like", $lname);
+//                 }
+//                 if(isset($search['date_of_birth']) && $search['date_of_birth'] != '')
+//                 {
+//                     $bos1_row->where('date_of_birth', $search['date_of_birth']);
+//                 }
+//                 if(isset($search['crn_number']) && $search['crn_number'] != '')
+//                 {
+//                     $bos1_row->orWhere('crn_number', $search['crn_number']);
+//                 }
+//                 if(isset($search['driver_license_no']) && $search['driver_license_no'] != '')
+//                 {
+//                     $bos1_row->orWhere('driver_license_no', $search['driver_license_no']);
+//                 }
+//                 if(isset($search['passport_no']) && $search['passport_no'] != '')
+//                 {
+//                     $bos1_row->orWhere('passport_no', $search['passport_no']);
+//                 } 
+//                 if(isset($search['medicare_no']) && $search['medicare_no'] != '')
+//                 {
+//                     $bos1_row->orWhere('medicare_no', $search['medicare_no']);
+//                 }
+//             })->get(); 
+        
     
+
+//             return $bos1_row;
+//                 // return static::where("name_first", "like", $fname)->orWhere("name_last", "like", $lname)->get();
+//   }
+
+
+  public static function search($search) {
+    $columns = ["first_name", "last_name"]; 
+      $fname = implode("%", str_split($search['first_name']));
+      $fname = "%$fname%";
+        $lname = implode("%", str_split($search['last_name']));
+        $lname = "%$lname%";
+ 
+
+       $mim_row = static::query();
+ 
+        if(isset($fname) && $fname != '' ) {
+            $mim_row = $mim_row->where("first_name", "like", $fname);
+        }
+        if(isset($lname) && $lname != '' ) {
+            $mim_row = $mim_row->where("last_name", "like", $lname);
+        }
+
+        if(isset($search['date_of_birth']) && $search['date_of_birth'] != '')
+        {
+            $mim_row = $mim_row->where('date_of_birth', $search['date_of_birth']);
+        }
+        if(isset($search['crn_number']) && $search['crn_number'] != '')
+        {
+            $mim_row = $mim_row->orWhere('crn_number', $search['crn_number']);
+        }
+        if(isset($search['driver_license_no']) && $search['driver_license_no'] != '')
+        {
+            $mim_row = $mim_row->orWhere('driver_license_no', $search['driver_license_no']);
+        }
+        if(isset($search['passport_no']) && $search['passport_no'] != '')
+        {
+            $mim_row = $mim_row->orWhere('passport_no', $search['passport_no']);
+        } 
+        if(isset($search['medicare_no']) && $search['medicare_no'] != '')
+        {                   
+            $mim_row = $mim_row->orWhere('medicare_no', $search['medicare_no']);
+        }
+        $mim_row = $mim_row->get();
+            return $mim_row; 
+  }
 
 }

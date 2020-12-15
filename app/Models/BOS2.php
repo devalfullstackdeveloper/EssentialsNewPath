@@ -129,4 +129,105 @@ class BOS2 extends Model
        $importLog->totalRecords = $rowcount;
        $importLog->save();
     }
+
+   /*
+    public static function search($search) {
+
+    $columns = ["name_first", "name_last"]; 
+      $fname = implode("%", str_split($search['name_first']));
+      $fname = "%$fname%";
+      	$lname = implode("%", str_split($search['name_last']));
+      	$lname = "%$lname%";
+      	
+      	return static::where("name_first", "like", $fname)->orWhere("name_last", "like", $lname)->get();
+  }
+*/
+
+public static function searchPlugin($search) {
+    $columns = ["name_first", "name_last"]; 
+      $fname = implode("%", str_split($search['name_first']));
+      $fname = "%$fname%";
+      	$lname = implode("%", str_split($search['name_last']));
+      	$lname = "%$lname%";
+      	DB::enableQueryLog(); 
+      	$bos2_row =  static::where(function($bos2_row) use ($search){
+                if(isset($fname) && $fname != '' )
+                {
+                    $bos2_row->where("name_first", "like", $fname);
+                }
+                if(isset($lname) && $lname != '' )
+                {
+                    $bos2_row->where("name_last", "like", $lname);
+                }
+                if(isset($search['dob']) && $search['dob'] != '')
+                {
+                    $bos2_row->where('dob', $search['dob']);
+                }
+                if(isset($search['crn']) && $search['crn'] != '')
+                {
+                    $bos2_row->orWhere('crn', $search['crn']);
+                }
+                if(isset($search['driver_license']) && $search['driver_license'] != '')
+                {
+                    $bos2_row->orWhere('driver_license', $search['driver_license']);
+                }
+                if(isset($search['passport']) && $search['driver_license'] != '')
+                {
+                    $bos2_row->orWhere('passport', $search['passport']);
+                } 
+                if(isset($search['medicare_card']) && $search['medicare_card'] != '')
+                {
+                    $bos2_row->orWhere('medicare_card', $search['medicare_card']);
+                }
+            })->get();
+      	
+	
+
+			return $bos2_row;
+      	     	// return static::where("name_first", "like", $fname)->orWhere("name_last", "like", $lname)->get();
+  }
+
+
+   public static function search($search) {
+    $columns = ["name_first", "name_last"]; 
+      $fname = implode("%", str_split($search['name_first']));
+      $fname = "%$fname%";
+      	$lname = implode("%", str_split($search['name_last']));
+      	$lname = "%$lname%";
+
+
+       $bos2_row = static::query();
+ 
+        if(isset($fname) && $fname != '' ) {
+            $bos2_row = $bos2_row->where("name_first", "like", $fname);
+        }
+        if(isset($lname) && $lname != '' ) {
+            $bos2_row = $bos2_row->where("name_last", "like", $lname);
+        }
+
+        if(isset($search['dob']) && $search['dob'] != '')
+        {
+            $bos2_row = $bos2_row->where('dob', $search['dob']);
+        }
+        if(isset($search['crn']) && $search['crn'] != '')
+        {
+            $bos2_row = $bos2_row->orWhere('crn', $search['crn']);
+        }
+        if(isset($search['driver_license']) && $search['driver_license'] != '')
+        {
+            $bos2_row = $bos2_row->orWhere('driver_license', $search['driver_license']);
+        }
+        if(isset($search['passport']) && $search['passport'] != '')
+        {
+            $bos2_row = $bos2_row->orWhere('passport', $search['passport']);
+        } 
+        if(isset($search['medicare_card']) && $search['medicare_card'] != '')
+        {                   
+            $bos2_row = $bos2_row->orWhere('medicare_card', $search['medicare_card']);
+        }
+        $bos2_row = $bos2_row->get();
+			return $bos2_row; 
+  }
+ 
+
 }

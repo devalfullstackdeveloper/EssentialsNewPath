@@ -12,6 +12,7 @@ use Exception;
 use DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Schema;
+use App\Models\ClientLogs;
 
 class UpdateRCSJOB implements ShouldQueue
 {
@@ -41,7 +42,7 @@ class UpdateRCSJOB implements ShouldQueue
     {
         try{
             $find = RCS::where('client_id','=',$this->request['client_id'])->get();
-        
+             $this->request['system'] = 'RCS'; 
             if(count($find)>0){
                 $cols = DB::getSchemaBuilder()->getColumnListing('rcs_data');
                 $this->versionData($this->request['client_id'],$this->request);
@@ -53,6 +54,21 @@ class UpdateRCSJOB implements ShouldQueue
                 }
                 
             }
+            else
+            {
+                $request_data = array();
+                $arrayData = $this->request;
+                $var1 = RCS::create($arrayData); 
+                $previous_data = RCS::where('client_id',$var1->client_id)->first();
+                $previous_data_json_encoded = json_encode($previous_data); 
+
+
+                $logs = array('system_id'=>$previous_data->rcs_id,'system_name'=>'RCS','client_id'=>$previous_data->client_id,'action_performed'=>'Add'   ,'previous_data'=>$previous_data);
+
+                $client_logs = ClientLogs::insert($logs);  
+
+                $match_data = \App\Helpers\Helper::matchData('RCS',$arrayData);
+            } 
             
         }catch(\Exception $ex){
             print_r($ex->getMessage());
@@ -79,7 +95,7 @@ class UpdateRCSJOB implements ShouldQueue
                         }
                         
                     }
-                }
+                } 
             }       
         }
     }

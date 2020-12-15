@@ -43,18 +43,18 @@ class AddRCSJobApi implements ShouldQueue
 
 
         try{
-            $arrayData = array();
+            $request_data = array();
            $arrayData = $this->request;
              $var1 = RCS::create($arrayData); 
-                    $previousData = RCS::where('client_id',$var1->client_id)->first();
-                    $prev_data = json_encode($previousData); 
+                    $previous_data = RCS::where('client_id',$var1->client_id)->first();
+                    $previous_data_json_encoded = json_encode($previous_data); 
 
 
-                    $logs = array('system_id'=>$previousData->rcs_id,'system_name'=>'RCS','client_id'=>$previousData->client_id,'action_performed'=>'Add'   ,'previous_data'=>$previousData);
+                    $logs = array('system_id'=>$previous_data->rcs_id,'system_name'=>'RCS','client_id'=>$previous_data->client_id,'action_performed'=>'Add'   ,'previous_data'=>$previous_data);
 
-                    $cleintLogs = ClientLogs::insert($logs);  
+                    $client_logs = ClientLogs::insert($logs);  
 
-                    $find_match = \App\Helpers\Helper::matchData1('RCS',$arrayData);
+                    $match_data = \App\Helpers\Helper::matchData('RCS',$arrayData);
         }catch(\Exception $ex){
             print_r($ex->getMessage());
         }
